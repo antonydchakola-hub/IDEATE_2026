@@ -322,7 +322,7 @@ main {
 
 /* Modal tweaks for mobile */
 .modal-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -359,9 +359,9 @@ main {
 
 .historical-split {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 1rem;
 }
 

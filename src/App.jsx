@@ -301,17 +301,17 @@ function App() {
                  <Mannequin data={selectedData.sensorData} isLive={false} scale={0.7} />
               </div>
               
-              <div className="historical-data-wrap">
-                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: 0 }}>
-                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+              <div className="historical-data-wrap" style={{ width: '100%' }}>
+                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', marginBottom: 0, width: '100%' }}>
+                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
                     <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.imbalance}</div>
                     <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Asymmetry</div>
                   </div>
-                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
                     <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.pumpIndex}</div>
                     <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Peak Pump</div>
                   </div>
-                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
                     <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.fatigue}</div>
                     <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Fatigue</div>
                   </div>
