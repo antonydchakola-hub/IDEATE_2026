@@ -352,6 +352,11 @@ main {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .historical-split {
   display: flex;
   gap: 1rem;

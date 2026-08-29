@@ -340,6 +340,28 @@ function App() {
               </div>
             </div>
 
+            <div className="chart-container" style={{ marginTop: '2rem', height: '180px' }}>
+              <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1rem' }}>Pump Output Over Time</h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={selectedData.chartData}>
+                  <defs>
+                    <linearGradient id="colorPump" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="time" stroke="var(--text-secondary)" fontSize={10} axisLine={false} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={10} width={30} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent-rose)', borderRadius: '8px', fontSize: '0.8rem' }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                  />
+                  <Area type="monotone" dataKey="pump" stroke="var(--accent-rose)" strokeWidth={2} fillOpacity={1} fill="url(#colorPump)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
           </div>
         </div>
       )}
