@@ -400,7 +400,7 @@ function App() {
                   </div>
                   <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
                     <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.pumpIndex}</div>
-                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Peak Pump</div>
+                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Peak Pump Index</div>
                   </div>
                   <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
                     <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.fatigue}</div>
