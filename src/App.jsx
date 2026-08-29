@@ -38,7 +38,11 @@ function Mannequin({ data, isLive, scale = 1 }) {
   };
 
   return (
-    <div className="mannequin-container" style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}>
+    <div className="mannequin-container" style={{ 
+      transform: `scale(${scale})`, 
+      transformOrigin: 'top center',
+      marginBottom: scale < 1 ? `-${(1 - scale) * 100}%` : '0'
+    }}>
       <div className="mannequin-toggle">
         <button className={`toggle-btn ${view === 'front' ? 'active' : ''}`} onClick={() => setView('front')}>Front</button>
         <button className={`toggle-btn ${view === 'back' ? 'active' : ''}`} onClick={() => setView('back')}>Back</button>
