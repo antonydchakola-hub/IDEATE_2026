@@ -295,7 +295,7 @@ main {
   justify-content: space-around;
   align-items: center;
   padding-bottom: 1rem; /* Safe area for modern phones */
-  z-index: 100;
+  z-index: 9999;
 }
 
 .nav-item {
@@ -341,7 +341,7 @@ main {
   max-width: 100%;
   height: 95%; /* Make it tall to fit everything */
   border-radius: 24px 24px 0 0;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem 6.5rem 1rem;
   animation: slideUpMobile 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   position: relative;
   overflow-y: auto;

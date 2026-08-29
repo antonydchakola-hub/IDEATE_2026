@@ -233,7 +233,7 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <div className="logo">PULSE</div>
+        <div className="logo">PUMP</div>
       </header>
 
       <main>
@@ -243,21 +243,21 @@ function App() {
       <nav className="bottom-nav">
         <button 
           className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => setActiveTab('home')}
+          onClick={() => { setActiveTab('home'); setSelectedWeekId(null); }}
         >
           <Home size={24} />
           <span>Live</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
-          onClick={() => setActiveTab('calendar')}
+          onClick={() => { setActiveTab('calendar'); setSelectedWeekId(null); }}
         >
           <CalendarIcon size={24} />
           <span>History</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('leaderboard')}
+          onClick={() => { setActiveTab('leaderboard'); setSelectedWeekId(null); }}
         >
           <Trophy size={24} />
           <span>Rankings</span>
