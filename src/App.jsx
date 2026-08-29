@@ -195,23 +195,54 @@ function App() {
         return (
           <div style={{ paddingBottom: '2rem' }}>
             <Mannequin data={liveSensorData} isLive={true} />
-            <div className="chart-container" style={{ marginTop: '3rem', height: '160px' }}>
-              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', textAlign: 'center' }}>Live Asymmetry (L vs R)</h3>
-              <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Negative = Left Dominant, Positive = Right Dominant</p>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={liveAsymmetryHistory}>
-                  <defs>
-                    <linearGradient id="colorAsym" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="time" hide={true} />
-                  <YAxis domain={[-30, 30]} stroke="var(--text-secondary)" fontSize={10} width={30} axisLine={false} tickLine={false} />
-                  <Area type="monotone" dataKey="value" stroke="var(--accent-rose)" strokeWidth={2} fillOpacity={1} fill="url(#colorAsym)" isAnimationActive={false} />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div style={{ marginTop: '2rem', width: '100%', padding: '0 2rem' }}>
+              
+              {/* LIVE PUMP INDEX SLIDER */}
+              <div style={{ marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>LIVE PUMP INDEX</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{Math.round(Object.values(liveSensorData).reduce((a,b)=>a+b,0) / Object.keys(liveSensorData).length)}</span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: `${Math.round(Object.values(liveSensorData).reduce((a,b)=>a+b,0) / Object.keys(liveSensorData).length)}%`, 
+                    height: '100%', 
+                    background: 'var(--accent-rose)',
+                    transition: 'width 0.3s ease'
+                  }}></div>
+                </div>
+              </div>
+
+              {/* LIVE ASYMMETRY SLIDER */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>ASYMMETRY (L/R)</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-rose)' }}>
+                    {Math.abs(liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value)}% {liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value < 0 ? 'L' : liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value > 0 ? 'R' : ''}
+                  </span>
+                </div>
+                <div style={{ position: 'relative', width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>
+                  {/* Center Line */}
+                  <div style={{ position: 'absolute', left: '50%', top: '-2px', bottom: '-2px', width: '2px', background: 'rgba(255,255,255,0.3)', zIndex: 2 }}></div>
+                  
+                  {/* Asymmetry Bar (originating from center) */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value < 0 ? `calc(50% - ${Math.abs(liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value)}%)` : '50%',
+                    width: `${Math.abs(liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value)}%`,
+                    background: 'var(--accent-rose)',
+                    transition: 'all 0.3s ease',
+                    borderRadius: liveAsymmetryHistory[liveAsymmetryHistory.length - 1].value < 0 ? '4px 0 0 4px' : '0 4px 4px 0'
+                  }}></div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                  <span>LEFT</span>
+                  <span>RIGHT</span>
+                </div>
+              </div>
+
             </div>
           </div>
         );
