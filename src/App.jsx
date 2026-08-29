@@ -388,23 +388,23 @@ function App() {
             </div>
             
             <div className="historical-split">
-              <div className="historical-mannequin-wrap">
+              <div className="historical-mannequin-wrap" style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                 <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                   <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1 }}>{selectedData.pumpIndex}</div>
+                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '0.4rem', fontWeight: 700 }}>Peak Pump Index</div>
+                 </div>
                  <Mannequin data={selectedData.sensorData} isLive={false} scale={0.7} />
               </div>
               
-              <div className="historical-data-wrap" style={{ width: '100%' }}>
-                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'row', gap: '0.5rem', marginBottom: 0, width: '100%' }}>
-                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.imbalance}</div>
-                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Asymmetry</div>
+              <div className="historical-data-wrap" style={{ width: '100%', marginTop: '0.5rem' }}>
+                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'row', gap: '1rem', marginBottom: 0, width: '100%' }}>
+                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '1rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.imbalance}</div>
+                    <div className="metric-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '0.3rem', fontWeight: 600 }}>Asymmetry</div>
                   </div>
-                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.pumpIndex}</div>
-                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Peak Pump Index</div>
-                  </div>
-                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.fatigue}</div>
-                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Fatigue</div>
+                  <div className="metric-card glass-panel" style={{ flex: 1, textAlign: 'center', padding: '1rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.fatigue}</div>
+                    <div className="metric-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '0.3rem', fontWeight: 600 }}>Fatigue</div>
                   </div>
                 </div>
               </div>
