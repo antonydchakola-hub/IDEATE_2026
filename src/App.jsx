@@ -162,7 +162,8 @@ function App() {
             L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
           } : {
             L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
-          }
+          },
+          chartData: Array.from({ length: 6 }, (_, i) => ({ time: `${i*10}m`, pump: 50 + Math.random() * 50 }))
         };
       });
 
@@ -402,6 +403,28 @@ function App() {
             <div className="insight-box" style={{ background: 'rgba(225, 29, 72, 0.1)', borderLeft: '4px solid var(--accent-rose)', padding: '1rem', borderRadius: '0 8px 8px 0', marginTop: '1rem' }}>
               <div className="insight-title" style={{ fontWeight: 700, color: 'var(--accent-rose-light)', marginBottom: '0.2rem', fontSize: '0.9rem' }}>Smart Coach Insight</div>
               <p style={{ fontSize: '0.85rem', margin: 0 }}>{selectedData.imbalanceInsight}</p>
+            </div>
+
+            <div className="chart-container" style={{ marginTop: '1.5rem', marginBottom: '1.5rem', height: '180px' }}>
+              <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1rem' }}>Pump Output Over Time</h3>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={selectedData.chartData}>
+                  <defs>
+                    <linearGradient id="colorPump" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="time" stroke="var(--text-secondary)" fontSize={10} axisLine={false} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={10} width={30} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent-rose)', borderRadius: '8px', fontSize: '0.8rem' }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                  />
+                  <Area type="monotone" dataKey="pump" stroke="var(--accent-rose)" strokeWidth={2} fillOpacity={1} fill="url(#colorPump)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
 
             <div style={{ marginTop: '1.5rem' }}>
