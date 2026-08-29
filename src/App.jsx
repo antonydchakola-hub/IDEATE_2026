@@ -390,8 +390,7 @@ function App() {
             <div className="historical-split">
               <div className="historical-mannequin-wrap" style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                  <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                   <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1 }}>{selectedData.pumpIndex}</div>
-                   <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '0.4rem', fontWeight: 700 }}>Peak Pump Index</div>
+                   <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>Peak Pump Index</h3>
                  </div>
                  <Mannequin data={selectedData.sensorData} isLive={false} scale={0.7} />
               </div>
