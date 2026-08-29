@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #141417;
+  --bg-card: rgba(26, 26, 30, 0.7);
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  
+  --accent-rose: #e11d48;
+  --accent-rose-light: #fb7185;
+  --accent-rose-dark: #be123c;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: #000; /* Outer background for desktop */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background-color: #050505; /* Very dark background outside phone app */
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  overflow: hidden; /* Prevent body scrolling, let app container scroll */
+}
+
+#root {
+  width: 100%;
+  max-width: 430px; /* iPhone Pro Max width approximation */
+  height: 100vh;
+  background-color: var(--bg-primary);
+  position: relative;
+  box-shadow: 0 0 50px rgba(225, 29, 72, 0.05); /* Subtle rose glow on desktop */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  margin: 0;
+}
+
+a {
+  color: var(--accent-rose-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-rose);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Hide Scrollbar for cleaner phone look */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
