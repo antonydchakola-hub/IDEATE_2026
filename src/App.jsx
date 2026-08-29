@@ -331,8 +331,14 @@ function App() {
 
   return (
     <div className="app-container">
-      <header>
-        <div className="logo">PUMP</div>
+      <header style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
+        <div className="logo" style={{ lineHeight: 1 }}>PUMP</div>
+        {activeTab === 'home' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div style={{ width: '8px', height: '8px', backgroundColor: 'var(--accent-rose)', borderRadius: '50%', boxShadow: '0 0 8px var(--accent-rose)', animation: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}></div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-rose)', textTransform: 'uppercase', letterSpacing: '1px' }}>Live</span>
+          </div>
+        )}
       </header>
 
       <main>
