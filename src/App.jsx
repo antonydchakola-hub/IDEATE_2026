@@ -83,11 +83,8 @@ function Mannequin({ data, isLive, scale = 1 }) {
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [selectedDayId, setSelectedDayId] = useState(null);
+  const [selectedData, setSelectedData] = useState(null); // Now stores the entire daily data object directly
   
-  // Calendar Navigation State
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7)); // Starts at August 2026
-
   const [liveAsymmetryHistory, setLiveAsymmetryHistory] = useState(() => 
     Array.from({ length: 20 }, (_, i) => ({ time: i, value: 0 }))
   );
@@ -102,75 +99,77 @@ function App() {
     L_TRICEP: 25, R_TRICEP: 24,
   });
 
-  // Dynamic Calendar & Mock Data Generation
-  const { calendarGrid, mockDailyData, monthTitle } = useMemo(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const title = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  // Generate 12 months (Jan 2026 to Dec 2026) for infinite scrolling calendar
+  const allMonths = useMemo(() => {
+    const months = [];
+    const year = 2026;
     
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startOffset = new Date(year, month, 1).getDay();
-
-    // Generate pseudo-random workout days based on the month and year
-    const workoutDays = [];
-    for (let i = 1; i <= daysInMonth; i++) {
-      // Seeded logic to keep it deterministic per month
-      const seededRand = ((i * 13) + (month * 17) + (year * 23)) % 100;
-      if (seededRand < 40) { // roughly 40% chance of workout
-        workoutDays.push(i);
-      }
-    }
-
-    const grid = Array.from({ length: 42 }, (_, i) => {
-      if (i < startOffset || i >= startOffset + daysInMonth) {
-        return { id: `empty-${i}`, empty: true };
-      }
-      const dayNum = i - startOffset + 1;
-      return {
-        id: `day-${dayNum}`,
-        dayNumber: dayNum,
-        empty: false,
-        hasWorkout: workoutDays.includes(dayNum),
-      };
-    });
-
-    const dailyData = {};
-    workoutDays.forEach(day => {
-      const isPushDay = day % 2 === 0;
-      const dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    for (let month = 0; month < 12; month++) {
+      const title = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       
-      dailyData[day] = {
-        dateString: dateStr,
-        title: isPushDay ? "Heavy Push Day" : "Pull & Core Focus",
-        duration: isPushDay ? "55 min" : "48 min",
-        totalReps: isPushDay ? 142 : 115,
-        imbalance: isPushDay ? "14% L" : "5% R",
-        imbalanceInsight: isPushDay 
-          ? "Left chest fatigue set in early. Focus on unilateral presses next week." 
-          : "Lats are pulling symmetrically, slight right trap overcompensation.",
-        pumpIndex: isPushDay ? 92 : 85,
-        fatigue: isPushDay ? "High" : "Moderate",
-        exercises: isPushDay ? [
-          { name: "Barbell Bench Press", sets: 4, detail: "4x8 @ 185lbs" },
-          { name: "Incline DB Press", sets: 3, detail: "3x10 @ 70lbs" },
-          { name: "Tricep Pushdowns", sets: 4, detail: "4x12 @ 65lbs" },
-          { name: "Lateral Raises", sets: 4, detail: "4x15 @ 25lbs" }
-        ] : [
-          { name: "Pull-ups", sets: 4, detail: "4x8 @ Bodyweight" },
-          { name: "Barbell Rows", sets: 4, detail: "4x10 @ 135lbs" },
-          { name: "Face Pulls", sets: 3, detail: "3x15 @ 40lbs" },
-          { name: "Hanging Leg Raises", sets: 3, detail: "3x12" }
-        ],
-        sensorData: isPushDay ? {
-          L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
-        } : {
-          L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
-        }
-      };
-    });
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const startOffset = new Date(year, month, 1).getDay();
 
-    return { calendarGrid: grid, mockDailyData: dailyData, monthTitle: title };
-  }, [currentDate]);
+      const workoutDays = [];
+      for (let i = 1; i <= daysInMonth; i++) {
+        const seededRand = ((i * 13) + (month * 17) + (year * 23)) % 100;
+        if (seededRand < 40) { 
+          workoutDays.push(i);
+        }
+      }
+
+      const grid = Array.from({ length: 42 }, (_, i) => {
+        if (i < startOffset || i >= startOffset + daysInMonth) {
+          return { id: `empty-${month}-${i}`, empty: true };
+        }
+        const dayNum = i - startOffset + 1;
+        return {
+          id: `day-${month}-${dayNum}`,
+          dayNumber: dayNum,
+          empty: false,
+          hasWorkout: workoutDays.includes(dayNum),
+        };
+      });
+
+      const dailyData = {};
+      workoutDays.forEach(day => {
+        const isPushDay = day % 2 === 0;
+        const dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        
+        dailyData[day] = {
+          dateString: dateStr,
+          title: isPushDay ? "Heavy Push Day" : "Pull & Core Focus",
+          duration: isPushDay ? "55 min" : "48 min",
+          totalReps: isPushDay ? 142 : 115,
+          imbalance: isPushDay ? "14% L" : "5% R",
+          imbalanceInsight: isPushDay 
+            ? "Left chest fatigue set in early. Focus on unilateral presses next week." 
+            : "Lats are pulling symmetrically, slight right trap overcompensation.",
+          pumpIndex: isPushDay ? 92 : 85,
+          fatigue: isPushDay ? "High" : "Moderate",
+          exercises: isPushDay ? [
+            { name: "Barbell Bench Press", sets: 4, detail: "4x8 @ 185lbs" },
+            { name: "Incline DB Press", sets: 3, detail: "3x10 @ 70lbs" },
+            { name: "Tricep Pushdowns", sets: 4, detail: "4x12 @ 65lbs" },
+            { name: "Lateral Raises", sets: 4, detail: "4x15 @ 25lbs" }
+          ] : [
+            { name: "Pull-ups", sets: 4, detail: "4x8 @ Bodyweight" },
+            { name: "Barbell Rows", sets: 4, detail: "4x10 @ 135lbs" },
+            { name: "Face Pulls", sets: 3, detail: "3x15 @ 40lbs" },
+            { name: "Hanging Leg Raises", sets: 3, detail: "3x12" }
+          ],
+          sensorData: isPushDay ? {
+            L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
+          } : {
+            L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
+          }
+        };
+      });
+
+      months.push({ id: `month-${month}`, title, grid, mockDailyData: dailyData });
+    }
+    return months;
+  }, []);
 
   useEffect(() => {
     if (activeTab !== 'home') return;
@@ -200,9 +199,6 @@ function App() {
     }, 1500);
     return () => clearInterval(interval);
   }, [activeTab]);
-
-  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
   const renderContent = () => {
     switch (activeTab) {
@@ -264,42 +260,37 @@ function App() {
       case 'calendar':
         const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
-          <section className="dashboard">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
-              <button onClick={prevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-primary)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <ChevronLeft size={20} />
-              </button>
-              <h2 className="section-title" style={{ margin: 0, fontSize: '1.4rem' }}>{monthTitle}</h2>
-              <button onClick={nextMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-primary)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <ChevronRight size={20} />
-              </button>
-            </div>
-            
-            <div className="calendar-header">
-              {weekdays.map((d, i) => (
-                <div key={i} className="calendar-day-header">{d}</div>
-              ))}
-            </div>
-            <div className="calendar-grid">
-              {calendarGrid.map((day) => {
-                if (day.empty) return <div key={day.id} className="calendar-day empty"></div>;
-                return (
-                  <div 
-                    key={day.id} 
-                    className={`calendar-day ${day.hasWorkout ? 'has-workout' : ''}`}
-                    onClick={() => {
-                      if (day.hasWorkout) {
-                        setSelectedDayId(day.dayNumber);
-                      } else {
-                        alert("Rest Day: No workout logged.");
-                      }
-                    }}
-                  >
-                    <span className="day-number">{day.dayNumber}</span>
-                  </div>
-                );
-              })}
-            </div>
+          <section className="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            {allMonths.map((monthData) => (
+              <div key={monthData.id}>
+                <h2 className="section-title" style={{ margin: '0 0 1.5rem 0', fontSize: '1.4rem', textAlign: 'center' }}>{monthData.title}</h2>
+                <div className="calendar-header">
+                  {weekdays.map((d, i) => (
+                    <div key={`${monthData.id}-wk-${i}`} className="calendar-day-header">{d}</div>
+                  ))}
+                </div>
+                <div className="calendar-grid">
+                  {monthData.grid.map((day) => {
+                    if (day.empty) return <div key={day.id} className="calendar-day empty"></div>;
+                    return (
+                      <div 
+                        key={day.id} 
+                        className={`calendar-day ${day.hasWorkout ? 'has-workout' : ''}`}
+                        onClick={() => {
+                          if (day.hasWorkout) {
+                            setSelectedData(monthData.mockDailyData[day.dayNumber]);
+                          } else {
+                            alert("Rest Day: No workout logged.");
+                          }
+                        }}
+                      >
+                        <span className="day-number">{day.dayNumber}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </section>
         );
       case 'leaderboard':
@@ -333,8 +324,6 @@ function App() {
     }
   };
 
-  const selectedData = selectedDayId ? mockDailyData[selectedDayId] : null;
-
   return (
     <div className="app-container">
       <header>
@@ -348,21 +337,21 @@ function App() {
       <nav className="bottom-nav">
         <button 
           className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('home'); setSelectedDayId(null); }}
+          onClick={() => { setActiveTab('home'); setSelectedData(null); }}
         >
           <Home size={24} />
           <span>Live</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('calendar'); setSelectedDayId(null); }}
+          onClick={() => { setActiveTab('calendar'); setSelectedData(null); }}
         >
           <CalendarIcon size={24} />
           <span>History</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('leaderboard'); setSelectedDayId(null); }}
+          onClick={() => { setActiveTab('leaderboard'); setSelectedData(null); }}
         >
           <Trophy size={24} />
           <span>Rankings</span>
@@ -371,9 +360,9 @@ function App() {
 
       {/* Full-screen popup modal for DAILY data */}
       {selectedData && (
-        <div className="modal-overlay" onClick={() => setSelectedDayId(null)}>
+        <div className="modal-overlay" onClick={() => setSelectedData(null)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedDayId(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: 'var(--text-secondary)', zIndex: 10 }}>
+            <button className="modal-close" onClick={() => setSelectedData(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: 'var(--text-secondary)', zIndex: 10 }}>
               <X size={24} />
             </button>
             
