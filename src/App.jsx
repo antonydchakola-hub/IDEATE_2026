@@ -1,62 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Activity, X, Dumbbell, Zap, Home, Calendar as CalendarIcon, Trophy, Clock, Target } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Activity, X, Dumbbell, Zap, Home, Calendar as CalendarIcon, Trophy, Clock, Target, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import './App.css';
-
-// --- MOCK CALENDAR DATA (August 2026) ---
-const startOffset = 6;
-const daysInMonth = 31;
-const workoutDays = [2, 4, 7, 9, 11, 14, 16, 18, 21, 23, 25, 28, 30];
-
-const calendarGrid = Array.from({ length: 42 }, (_, i) => {
-  if (i < startOffset || i >= startOffset + daysInMonth) {
-    return { id: `empty-${i}`, empty: true };
-  }
-  const dayNum = i - startOffset + 1;
-  return {
-    id: `day-${dayNum}`,
-    dayNumber: dayNum,
-    empty: false,
-    hasWorkout: workoutDays.includes(dayNum),
-  };
-});
-
-// Generate rich daily details
-const MOCK_DAILY_DATA = {};
-workoutDays.forEach(day => {
-  const isPushDay = day % 2 === 0;
-  
-  MOCK_DAILY_DATA[day] = {
-    dateString: `August ${day}, 2026`,
-    title: isPushDay ? "Heavy Push Day" : "Pull & Core Focus",
-    duration: isPushDay ? "55 min" : "48 min",
-    totalReps: isPushDay ? 142 : 115,
-    imbalance: isPushDay ? "14% L" : "5% R",
-    imbalanceInsight: isPushDay 
-      ? "Left chest fatigue set in early. Focus on unilateral presses next week." 
-      : "Lats are pulling symmetrically, slight right trap overcompensation.",
-    pumpIndex: isPushDay ? 92 : 85,
-    fatigue: isPushDay ? "High" : "Moderate",
-    exercises: isPushDay ? [
-      { name: "Barbell Bench Press", sets: 4, detail: "4x8 @ 185lbs" },
-      { name: "Incline DB Press", sets: 3, detail: "3x10 @ 70lbs" },
-      { name: "Tricep Pushdowns", sets: 4, detail: "4x12 @ 65lbs" },
-      { name: "Lateral Raises", sets: 4, detail: "4x15 @ 25lbs" }
-    ] : [
-      { name: "Pull-ups", sets: 4, detail: "4x8 @ Bodyweight" },
-      { name: "Barbell Rows", sets: 4, detail: "4x10 @ 135lbs" },
-      { name: "Face Pulls", sets: 3, detail: "3x15 @ 40lbs" },
-      { name: "Hanging Leg Raises", sets: 3, detail: "3x12" }
-    ],
-    sensorData: isPushDay ? {
-      L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
-    } : {
-      L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
-    },
-    // Mini heart-rate / effort chart for the workout duration
-    chartData: Array.from({ length: 6 }, (_, i) => ({ time: `${i*10}m`, pump: 50 + Math.random() * 50 }))
-  };
-});
 
 const MOCK_LEADERBOARD = [
   { id: 1, name: "Alex R.", points: 14250, streak: 12, isMe: false },
@@ -132,13 +77,6 @@ function Mannequin({ data, isLive, scale = 1 }) {
           </>
         )}
       </div>
-      
-      {isLive && (
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>LIVE PUMP INDEX</div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Broadcasting via BLE (UART)</p>
-        </div>
-      )}
     </div>
   );
 }
@@ -146,6 +84,10 @@ function Mannequin({ data, isLive, scale = 1 }) {
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedDayId, setSelectedDayId] = useState(null);
+  
+  // Calendar Navigation State
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 7)); // Starts at August 2026
+
   const [liveAsymmetryHistory, setLiveAsymmetryHistory] = useState(() => 
     Array.from({ length: 20 }, (_, i) => ({ time: i, value: 0 }))
   );
@@ -159,6 +101,76 @@ function App() {
     L_TRAP: 15, R_TRAP: 15,
     L_TRICEP: 25, R_TRICEP: 24,
   });
+
+  // Dynamic Calendar & Mock Data Generation
+  const { calendarGrid, mockDailyData, monthTitle } = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const title = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startOffset = new Date(year, month, 1).getDay();
+
+    // Generate pseudo-random workout days based on the month and year
+    const workoutDays = [];
+    for (let i = 1; i <= daysInMonth; i++) {
+      // Seeded logic to keep it deterministic per month
+      const seededRand = ((i * 13) + (month * 17) + (year * 23)) % 100;
+      if (seededRand < 40) { // roughly 40% chance of workout
+        workoutDays.push(i);
+      }
+    }
+
+    const grid = Array.from({ length: 42 }, (_, i) => {
+      if (i < startOffset || i >= startOffset + daysInMonth) {
+        return { id: `empty-${i}`, empty: true };
+      }
+      const dayNum = i - startOffset + 1;
+      return {
+        id: `day-${dayNum}`,
+        dayNumber: dayNum,
+        empty: false,
+        hasWorkout: workoutDays.includes(dayNum),
+      };
+    });
+
+    const dailyData = {};
+    workoutDays.forEach(day => {
+      const isPushDay = day % 2 === 0;
+      const dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      
+      dailyData[day] = {
+        dateString: dateStr,
+        title: isPushDay ? "Heavy Push Day" : "Pull & Core Focus",
+        duration: isPushDay ? "55 min" : "48 min",
+        totalReps: isPushDay ? 142 : 115,
+        imbalance: isPushDay ? "14% L" : "5% R",
+        imbalanceInsight: isPushDay 
+          ? "Left chest fatigue set in early. Focus on unilateral presses next week." 
+          : "Lats are pulling symmetrically, slight right trap overcompensation.",
+        pumpIndex: isPushDay ? 92 : 85,
+        fatigue: isPushDay ? "High" : "Moderate",
+        exercises: isPushDay ? [
+          { name: "Barbell Bench Press", sets: 4, detail: "4x8 @ 185lbs" },
+          { name: "Incline DB Press", sets: 3, detail: "3x10 @ 70lbs" },
+          { name: "Tricep Pushdowns", sets: 4, detail: "4x12 @ 65lbs" },
+          { name: "Lateral Raises", sets: 4, detail: "4x15 @ 25lbs" }
+        ] : [
+          { name: "Pull-ups", sets: 4, detail: "4x8 @ Bodyweight" },
+          { name: "Barbell Rows", sets: 4, detail: "4x10 @ 135lbs" },
+          { name: "Face Pulls", sets: 3, detail: "3x15 @ 40lbs" },
+          { name: "Hanging Leg Raises", sets: 3, detail: "3x12" }
+        ],
+        sensorData: isPushDay ? {
+          L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
+        } : {
+          L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
+        }
+      };
+    });
+
+    return { calendarGrid: grid, mockDailyData: dailyData, monthTitle: title };
+  }, [currentDate]);
 
   useEffect(() => {
     if (activeTab !== 'home') return;
@@ -188,6 +200,9 @@ function App() {
     }, 1500);
     return () => clearInterval(interval);
   }, [activeTab]);
+
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
   const renderContent = () => {
     switch (activeTab) {
@@ -250,7 +265,16 @@ function App() {
         const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
           <section className="dashboard">
-            <h2 className="section-title">August 2026</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
+              <button onClick={prevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-primary)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <ChevronLeft size={20} />
+              </button>
+              <h2 className="section-title" style={{ margin: 0, fontSize: '1.4rem' }}>{monthTitle}</h2>
+              <button onClick={nextMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-primary)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <ChevronRight size={20} />
+              </button>
+            </div>
+            
             <div className="calendar-header">
               {weekdays.map((d, i) => (
                 <div key={i} className="calendar-day-header">{d}</div>
@@ -309,7 +333,7 @@ function App() {
     }
   };
 
-  const selectedData = selectedDayId ? MOCK_DAILY_DATA[selectedDayId] : null;
+  const selectedData = selectedDayId ? mockDailyData[selectedDayId] : null;
 
   return (
     <div className="app-container">
@@ -394,7 +418,6 @@ function App() {
             <div style={{ marginTop: '1.5rem' }}>
               <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1rem' }}>Exercises Logged</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-
                 {selectedData.exercises.map((ex, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div>
@@ -405,28 +428,6 @@ function App() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="chart-container" style={{ marginTop: '2rem', height: '180px' }}>
-              <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1rem' }}>Pump Output Over Time</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={selectedData.chartData}>
-                  <defs>
-                    <linearGradient id="colorPump" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="time" stroke="var(--text-secondary)" fontSize={10} axisLine={false} tickLine={false} />
-                  <YAxis stroke="var(--text-secondary)" fontSize={10} width={30} axisLine={false} tickLine={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent-rose)', borderRadius: '8px', fontSize: '0.8rem' }}
-                    itemStyle={{ color: 'var(--text-primary)' }}
-                  />
-                  <Area type="monotone" dataKey="pump" stroke="var(--accent-rose)" strokeWidth={2} fillOpacity={1} fill="url(#colorPump)" />
-                </AreaChart>
-              </ResponsiveContainer>
             </div>
 
           </div>
