@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, X, Dumbbell, Zap, Home, Calendar as CalendarIcon, Trophy } from 'lucide-react';
+import { Activity, X, Dumbbell, Zap, Home, Calendar as CalendarIcon, Trophy, Clock, Target } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import './App.css';
 
@@ -18,37 +18,45 @@ const calendarGrid = Array.from({ length: 42 }, (_, i) => {
     dayNumber: dayNum,
     empty: false,
     hasWorkout: workoutDays.includes(dayNum),
-    weekId: Math.floor((dayNum - 1) / 7),
   };
 });
 
-const MOCK_WEEKLY_DATA = {
-  0: { 
-    title: "Week of Aug 2 - Aug 8", imbalance: "14% L", imbalanceInsight: "Left lat lagging on rows", pumpIndex: "85", fatigue: "Moderate", 
-    chartData: [{ day: 'Mon', pump: 60, effort: 70 }, { day: 'Tue', pump: 0, effort: 0 }, { day: 'Wed', pump: 85, effort: 80 }, { day: 'Thu', pump: 0, effort: 0 }, { day: 'Fri', pump: 90, effort: 95 }, { day: 'Sat', pump: 0, effort: 0 }, { day: 'Sun', pump: 0, effort: 0 }],
-    sensorData: { L_CHEST: 80, R_CHEST: 82, L_DELT: 70, R_DELT: 75, L_BICEP: 65, R_BICEP: 68, CORE: 90, L_LAT: 45, R_LAT: 75, L_TRAP: 50, R_TRAP: 55, L_TRICEP: 60, R_TRICEP: 62 }
-  },
-  1: { 
-    title: "Week of Aug 9 - Aug 15", imbalance: "8% L", imbalanceInsight: "Imbalance improving. Keep focus on left-side accessories.", pumpIndex: "92", fatigue: "High", 
-    chartData: [{ day: 'Mon', pump: 75, effort: 80 }, { day: 'Tue', pump: 0, effort: 0 }, { day: 'Wed', pump: 88, effort: 85 }, { day: 'Thu', pump: 0, effort: 0 }, { day: 'Fri', pump: 95, effort: 100 }, { day: 'Sat', pump: 0, effort: 0 }, { day: 'Sun', pump: 0, effort: 0 }],
-    sensorData: { L_CHEST: 85, R_CHEST: 86, L_DELT: 75, R_DELT: 78, L_BICEP: 70, R_BICEP: 72, CORE: 92, L_LAT: 65, R_LAT: 78, L_TRAP: 60, R_TRAP: 62, L_TRICEP: 65, R_TRICEP: 68 }
-  },
-  2: { 
-    title: "Week of Aug 16 - Aug 22", imbalance: "4% R", imbalanceInsight: "Slight right overcompensation.", pumpIndex: "98", fatigue: "Very High", 
-    chartData: [{ day: 'Mon', pump: 80, effort: 80 }, { day: 'Tue', pump: 0, effort: 0 }, { day: 'Wed', pump: 90, effort: 90 }, { day: 'Thu', pump: 0, effort: 0 }, { day: 'Fri', pump: 99, effort: 100 }, { day: 'Sat', pump: 0, effort: 0 }, { day: 'Sun', pump: 0, effort: 0 }],
-    sensorData: { L_CHEST: 90, R_CHEST: 88, L_DELT: 85, R_DELT: 82, L_BICEP: 80, R_BICEP: 78, CORE: 95, L_LAT: 88, R_LAT: 84, L_TRAP: 80, R_TRAP: 75, L_TRICEP: 85, R_TRICEP: 82 }
-  },
-  3: { 
-    title: "Week of Aug 23 - Aug 29", imbalance: "2% L", imbalanceInsight: "Nearly perfect symmetry achieved.", pumpIndex: "102", fatigue: "Moderate", 
-    chartData: [{ day: 'Mon', pump: 85, effort: 85 }, { day: 'Tue', pump: 0, effort: 0 }, { day: 'Wed', pump: 95, effort: 95 }, { day: 'Thu', pump: 0, effort: 0 }, { day: 'Fri', pump: 105, effort: 100 }, { day: 'Sat', pump: 0, effort: 0 }, { day: 'Sun', pump: 0, effort: 0 }],
-    sensorData: { L_CHEST: 95, R_CHEST: 96, L_DELT: 90, R_DELT: 92, L_BICEP: 88, R_BICEP: 89, CORE: 98, L_LAT: 94, R_LAT: 96, L_TRAP: 88, R_TRAP: 90, L_TRICEP: 92, R_TRICEP: 94 }
-  },
-  4: { 
-    title: "Week of Aug 30 - Aug 31", imbalance: "1% L", imbalanceInsight: "Great finish to the month.", pumpIndex: "90", fatigue: "Low", 
-    chartData: [{ day: 'Mon', pump: 90, effort: 90 }, { day: 'Tue', pump: 0, effort: 0 }],
-    sensorData: { L_CHEST: 80, R_CHEST: 81, L_DELT: 75, R_DELT: 76, L_BICEP: 70, R_BICEP: 71, CORE: 85, L_LAT: 78, R_LAT: 80, L_TRAP: 75, R_TRAP: 76, L_TRICEP: 80, R_TRICEP: 81 }
-  },
-};
+// Generate rich daily details
+const MOCK_DAILY_DATA = {};
+workoutDays.forEach(day => {
+  const isPushDay = day % 2 === 0;
+  
+  MOCK_DAILY_DATA[day] = {
+    dateString: `August ${day}, 2026`,
+    title: isPushDay ? "Heavy Push Day" : "Pull & Core Focus",
+    duration: isPushDay ? "55 min" : "48 min",
+    totalReps: isPushDay ? 142 : 115,
+    imbalance: isPushDay ? "14% L" : "5% R",
+    imbalanceInsight: isPushDay 
+      ? "Left chest fatigue set in early. Focus on unilateral presses next week." 
+      : "Lats are pulling symmetrically, slight right trap overcompensation.",
+    pumpIndex: isPushDay ? 92 : 85,
+    fatigue: isPushDay ? "High" : "Moderate",
+    exercises: isPushDay ? [
+      { name: "Barbell Bench Press", sets: 4, detail: "4x8 @ 185lbs" },
+      { name: "Incline DB Press", sets: 3, detail: "3x10 @ 70lbs" },
+      { name: "Tricep Pushdowns", sets: 4, detail: "4x12 @ 65lbs" },
+      { name: "Lateral Raises", sets: 4, detail: "4x15 @ 25lbs" }
+    ] : [
+      { name: "Pull-ups", sets: 4, detail: "4x8 @ Bodyweight" },
+      { name: "Barbell Rows", sets: 4, detail: "4x10 @ 135lbs" },
+      { name: "Face Pulls", sets: 3, detail: "3x15 @ 40lbs" },
+      { name: "Hanging Leg Raises", sets: 3, detail: "3x12" }
+    ],
+    sensorData: isPushDay ? {
+      L_CHEST: 95, R_CHEST: 80, L_DELT: 85, R_DELT: 88, L_BICEP: 30, R_BICEP: 32, CORE: 60, L_LAT: 20, R_LAT: 22, L_TRAP: 40, R_TRAP: 45, L_TRICEP: 90, R_TRICEP: 92
+    } : {
+      L_CHEST: 20, R_CHEST: 22, L_DELT: 40, R_DELT: 42, L_BICEP: 85, R_BICEP: 82, CORE: 80, L_LAT: 95, R_LAT: 92, L_TRAP: 80, R_TRAP: 88, L_TRICEP: 25, R_TRICEP: 24
+    },
+    // Mini heart-rate / effort chart for the workout duration
+    chartData: Array.from({ length: 6 }, (_, i) => ({ time: `${i*10}m`, pump: 50 + Math.random() * 50 }))
+  };
+});
 
 const MOCK_LEADERBOARD = [
   { id: 1, name: "Alex R.", points: 14250, streak: 12, isMe: false },
@@ -62,7 +70,7 @@ function Mannequin({ data, isLive, scale = 1 }) {
   const [view, setView] = useState('front');
 
   const renderSensor = (key, top, left, label) => {
-    const val = data[key];
+    const val = data[key] || 0;
     const intensity = Math.max(0.2, val / 100);
     const s = 1 + (val / 100) * 0.2;
     
@@ -137,7 +145,7 @@ function Mannequin({ data, isLive, scale = 1 }) {
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [selectedWeekId, setSelectedWeekId] = useState(null);
+  const [selectedDayId, setSelectedDayId] = useState(null);
   
   const [liveSensorData, setLiveSensorData] = useState({
     L_CHEST: 45, R_CHEST: 42,
@@ -189,7 +197,11 @@ function App() {
                     key={day.id} 
                     className={`calendar-day ${day.hasWorkout ? 'has-workout' : ''}`}
                     onClick={() => {
-                      if (day.hasWorkout) setSelectedWeekId(day.weekId || 0);
+                      if (day.hasWorkout) {
+                        setSelectedDayId(day.dayNumber);
+                      } else {
+                        alert("Rest Day: No workout logged.");
+                      }
                     }}
                   >
                     <span className="day-number">{day.dayNumber}</span>
@@ -230,6 +242,8 @@ function App() {
     }
   };
 
+  const selectedData = selectedDayId ? MOCK_DAILY_DATA[selectedDayId] : null;
+
   return (
     <div className="app-container">
       <header>
@@ -243,54 +257,63 @@ function App() {
       <nav className="bottom-nav">
         <button 
           className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('home'); setSelectedWeekId(null); }}
+          onClick={() => { setActiveTab('home'); setSelectedDayId(null); }}
         >
           <Home size={24} />
           <span>Live</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('calendar'); setSelectedWeekId(null); }}
+          onClick={() => { setActiveTab('calendar'); setSelectedDayId(null); }}
         >
           <CalendarIcon size={24} />
           <span>History</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('leaderboard'); setSelectedWeekId(null); }}
+          onClick={() => { setActiveTab('leaderboard'); setSelectedDayId(null); }}
         >
           <Trophy size={24} />
           <span>Rankings</span>
         </button>
       </nav>
 
-      {selectedWeekId !== null && MOCK_WEEKLY_DATA[selectedWeekId] && (
-        <div className="modal-overlay" onClick={() => setSelectedWeekId(null)}>
+      {/* Full-screen popup modal for DAILY data */}
+      {selectedData && (
+        <div className="modal-overlay" onClick={() => setSelectedDayId(null)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedWeekId(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: 'var(--text-secondary)', zIndex: 10 }}>
+            <button className="modal-close" onClick={() => setSelectedDayId(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: 'var(--text-secondary)', zIndex: 10 }}>
               <X size={24} />
             </button>
             
             <div className="modal-header" style={{ marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-              <h2 className="modal-title" style={{ fontSize: '1.5rem', fontWeight: 700 }}>Insights</h2>
-              <div className="modal-subtitle" style={{ color: 'var(--accent-rose-light)', fontSize: '0.9rem' }}>{MOCK_WEEKLY_DATA[selectedWeekId].title}</div>
+              <h2 className="modal-title" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{selectedData.title}</h2>
+              <div className="modal-subtitle" style={{ color: 'var(--accent-rose-light)', fontSize: '0.9rem' }}>{selectedData.dateString}</div>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Clock size={16}/> {selectedData.duration}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Target size={16}/> {selectedData.totalReps} Reps</span>
+              </div>
             </div>
             
-            {/* Split View for Historical Data: Mannequin + Charts */}
             <div className="historical-split">
               <div className="historical-mannequin-wrap">
-                 <Mannequin data={MOCK_WEEKLY_DATA[selectedWeekId].sensorData} isLive={false} scale={0.7} />
+                 <Mannequin data={selectedData.sensorData} isLive={false} scale={0.7} />
               </div>
               
               <div className="historical-data-wrap">
-                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: 0 }}>
-                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '1rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{MOCK_WEEKLY_DATA[selectedWeekId].imbalance}</div>
+                <div className="metrics-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: 0 }}>
+                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.imbalance}</div>
                     <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Asymmetry</div>
                   </div>
-                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '1rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{MOCK_WEEKLY_DATA[selectedWeekId].pumpIndex}</div>
+                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.pumpIndex}</div>
                     <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Peak Pump</div>
+                  </div>
+                  <div className="metric-card glass-panel" style={{ textAlign: 'center', padding: '0.75rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-rose)' }}>{selectedData.fatigue}</div>
+                    <div className="metric-label" style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Fatigue</div>
                   </div>
                 </div>
               </div>
@@ -298,30 +321,25 @@ function App() {
 
             <div className="insight-box" style={{ background: 'rgba(225, 29, 72, 0.1)', borderLeft: '4px solid var(--accent-rose)', padding: '1rem', borderRadius: '0 8px 8px 0', marginTop: '1rem' }}>
               <div className="insight-title" style={{ fontWeight: 700, color: 'var(--accent-rose-light)', marginBottom: '0.2rem', fontSize: '0.9rem' }}>Smart Coach Insight</div>
-              <p style={{ fontSize: '0.85rem', margin: 0 }}>{MOCK_WEEKLY_DATA[selectedWeekId].imbalanceInsight}</p>
+              <p style={{ fontSize: '0.85rem', margin: 0 }}>{selectedData.imbalanceInsight}</p>
             </div>
 
-            <div className="chart-container" style={{ height: '150px' }}>
-              <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '0.9rem' }}>Workload Trends</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOCK_WEEKLY_DATA[selectedWeekId].chartData}>
-                  <defs>
-                    <linearGradient id="colorPump" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                  <XAxis dataKey="day" stroke="var(--text-secondary)" fontSize={10} />
-                  <YAxis stroke="var(--text-secondary)" fontSize={10} width={30} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--accent-rose)', borderRadius: '8px', fontSize: '0.8rem' }}
-                    itemStyle={{ color: 'var(--text-primary)' }}
-                  />
-                  <Area type="monotone" dataKey="pump" stroke="var(--accent-rose)" fillOpacity={1} fill="url(#colorPump)" />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div style={{ marginTop: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1rem' }}>Exercises Logged</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
+                {selectedData.exercises.map((ex, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{ex.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{ex.detail}</div>
+                    </div>
+                    <div style={{ fontWeight: 800, color: 'var(--accent-rose)' }}>{ex.sets} Sets</div>
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
         </div>
       )}
