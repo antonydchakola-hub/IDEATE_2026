@@ -146,6 +146,9 @@ function Mannequin({ data, isLive, scale = 1 }) {
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedDayId, setSelectedDayId] = useState(null);
+  const [liveAsymmetryHistory, setLiveAsymmetryHistory] = useState(() => 
+    Array.from({ length: 20 }, (_, i) => ({ time: i, value: 0 }))
+  );
   
   const [liveSensorData, setLiveSensorData] = useState({
     L_CHEST: 45, R_CHEST: 42,
@@ -160,16 +163,27 @@ function App() {
   useEffect(() => {
     if (activeTab !== 'home') return;
     const interval = setInterval(() => {
+      let asym = 0;
       setLiveSensorData(prev => {
         const newData = { ...prev };
+        let leftTotal = 0;
+        let rightTotal = 0;
         Object.keys(newData).forEach(key => {
           let drift = Math.floor(Math.random() * 11) - 5;
           let val = newData[key] + drift;
           if (val < 0) val = 0;
           if (val > 100) val = 100;
           newData[key] = val;
+          if (key.startsWith('L_')) leftTotal += val;
+          if (key.startsWith('R_')) rightTotal += val;
         });
+        asym = Math.round((rightTotal - leftTotal) / 3);
         return newData;
+      });
+      
+      setLiveAsymmetryHistory(prev => {
+        const newHist = [...prev.slice(1), { time: Date.now(), value: asym }];
+        return newHist;
       });
     }, 1500);
     return () => clearInterval(interval);
@@ -178,7 +192,29 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <Mannequin data={liveSensorData} isLive={true} />;
+        return (
+          <div style={{ paddingBottom: '2rem' }}>
+            <Mannequin data={liveSensorData} isLive={true} />
+            <div className="chart-container" style={{ marginTop: '3rem', height: '160px' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', textAlign: 'center' }}>Live Asymmetry (L vs R)</h3>
+              <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Negative = Left Dominant, Positive = Right Dominant</p>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={liveAsymmetryHistory}>
+                  <defs>
+                    <linearGradient id="colorAsym" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent-rose)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--accent-rose)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="time" hide={true} />
+                  <YAxis domain={[-30, 30]} stroke="var(--text-secondary)" fontSize={10} width={30} axisLine={false} tickLine={false} />
+                  <Area type="monotone" dataKey="value" stroke="var(--accent-rose)" strokeWidth={2} fillOpacity={1} fill="url(#colorAsym)" isAnimationActive={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        );
       case 'calendar':
         const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
         return (
